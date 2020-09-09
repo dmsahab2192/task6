@@ -1,0 +1,76 @@
+resource "kubernetes_deployment" "wp" {
+	metadata {
+		name   = "wp"
+		labels = {
+		env     = "Prod"
+		Country = "Ind" 
+		}
+	}
+	depends_on = [kubernetes_persistent_volume_claim.pvc_wp]
+	spec {
+		replicas = 1
+		selector {
+			match_labels = {
+				pod     = "wp"
+				env     = "Prod"
+				Country = "Ind" 
+        
+			}
+		}
+
+		template {
+			metadata {
+				labels = {
+					pod     = "wp"
+					env     = "Prod"
+					Country = "Ind"  
+				}
+			}
+
+			spec {
+				volume {
+					name = "wp-vol"
+					persistent_volume_claim { 
+						claim_name = kubernetes_persistent_volume_claim.pvc_wp.metadata.0.name
+					}
+				}
+
+				container {
+					image = "wordpress"
+					name  = "word-app"
+
+					env {
+						name  = "WORDPRESS_DB_HOST"
+						value = aws_db_instance.wp_rds.address
+					}
+					env {
+						name  = "WORDPRESS_DB_USER"
+						value = "deepak"
+					}
+					env {
+						name  = "WORDPRESS_DB_PASSWORD"
+						value = "deepak123"
+					}
+					env{
+						name  = "WORDPRESS_DB_NAME"
+						value = "wpdb"
+					}
+					env{
+						name  = "WORDPRESS_TABLE_PREFIX"
+						value = "wp_"
+					}
+
+					volume_mount {
+						name       = "wp-vol"
+						mount_path = "/var/www/html/"
+					}
+
+					port {
+						container_port = 80
+					}
+				}
+			}
+		}
+	}
+}
+
