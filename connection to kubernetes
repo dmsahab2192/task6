@@ -1,0 +1,26 @@
+provider "kubernetes" {
+}
+
+
+
+//Launching PVC for WordPress
+resource "kubernetes_persistent_volume_claim" "pvc_wp" {
+	depends_on = [aws_db_instance.wp_rds]
+	metadata {
+		name   = "pvc-wp"
+		labels = {
+		env     = "Production"
+		Country = "India" 
+		}
+	}
+
+	wait_until_bound = false
+	spec {
+		access_modes = ["ReadWriteOnce"]
+		resources {
+			requests = {
+			storage = "5Gi"
+			}
+		}
+	}
+}
