@@ -1,0 +1,21 @@
+resource "kubernetes_service" "wpLb" {
+	metadata {
+		name   = "wp-svc"
+		labels = {
+			env     = "Prod"
+			Country = "Ind" 
+		}
+	}  
+
+	depends_on = [kubernetes_deployment.wp]
+
+	spec {
+		type     = "NodePort"
+		selector = {
+		pod = "wp"
+		}
+		port {
+			port = 80
+		}
+	}
+}
